@@ -1,0 +1,203 @@
+--Database of manufacturing company
+
+CREATE TABLE Adres (
+    Adres_ID INT PRIMARY KEY,
+    Ulica VARCHAR(100) NOT NULL,
+    Nr_Domu VARCHAR(10) NOT NULL,
+    Kod_Pocztowy VARCHAR(10) NOT NULL,
+    Miasto VARCHAR(100) NOT NULL,
+    Kraj VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE Pracownicy (
+    Pracownik_ID INT PRIMARY KEY,
+    Imie VARCHAR(30) NOT NULL,
+    Nazwisko VARCHAR(50) NOT NULL,
+    Stanowisko VARCHAR(40),
+    Sluzbowy_Numer_Telefonu VARCHAR(10) UNIQUE NOT NULL,
+    Sluzbowy_Email VARCHAR(100) UNIQUE NOT NULL,
+    Dzial_ID INT,
+    Adres_ID INT,
+    Data_Urodzenia DATE NOT NULL,
+    Data_Zatrudnienia DATE DEFAULT SYSDATE,
+    CHECK (Data_Zatrudnienia > Data_Urodzenia),
+    FOREIGN KEY (Adres_ID) REFERENCES Adres(Adres_ID)
+);
+
+CREATE TABLE Dzialy (
+    Dzial_ID INT PRIMARY KEY,
+    Nazwa VARCHAR(100) NOT NULL,
+    Data_Powstania DATE NOT NULL,
+    Liczba_Pracownikow INT CHECK (Liczba_Pracownikow > 0) NOT NULL,
+    Kierownik_Dzialu INT,
+    FOREIGN KEY (Kierownik_Dzialu) REFERENCES Pracownicy(Pracownik_ID)
+);
+
+CREATE TABLE Dostawcy (
+    Dostawca_ID INT PRIMARY KEY,
+    Nazwa VARCHAR(100) NOT NULL,
+    Numer_Kontaktowy VARCHAR(10) UNIQUE,
+    Numer_Fax VARCHAR(10) UNIQUE,
+    Email VARCHAR(100) UNIQUE NOT NULL,
+    Adres_ID INT,
+    CHECK (Numer_Fax IS NULL OR Numer_Kontaktowy IS NULL OR Numer_Fax != Numer_Kontaktowy),
+    FOREIGN KEY (Adres_ID) REFERENCES Adres(Adres_ID)
+);
+
+CREATE TABLE Klienci (
+    Klient_ID INT PRIMARY KEY,
+    Nazwa_firmy VARCHAR(100),
+    Imie VARCHAR(30) NOT NULL,
+    Nazwisko VARCHAR(50) NOT NULL,
+    Numer_Telefonu VARCHAR(10) UNIQUE NOT NULL,
+    Adres_ID INT,
+    FOREIGN KEY (Adres_ID) REFERENCES Adres(Adres_ID)
+);
+
+CREATE TABLE Zamowienia (
+    Zamowienie_ID INT PRIMARY KEY,
+    Data_Zamowienia DATE DEFAULT SYSDATE,
+    Wartosc_Zamowienia DECIMAL(10, 2) CHECK (Wartosc_Zamowienia > 0.0) NOT NULL,
+    Status_Platnosci VARCHAR(30) NOT NULL,
+    Status_Realizacji VARCHAR(30) DEFAULT 'W realizacji',
+    Klient_ID INT NOT NULL,
+    Pracownik_ID INT NOT NULL,
+    FOREIGN KEY (Pracownik_ID) REFERENCES Pracownicy(Pracownik_ID),
+    FOREIGN KEY (Klient_ID) REFERENCES Klienci(Klient_ID)
+);
+
+CREATE TABLE Materialy (
+    Material_ID INT PRIMARY KEY,
+    Nazwa VARCHAR(100) NOT NULL,
+    Jednostka_Miary VARCHAR(50) NOT NULL,
+    Cena_Za_Jednostke DECIMAL(10, 2) CHECK (Cena_Za_Jednostke > 0.0) NOT NULL,
+    Dostawca_ID INT,
+    FOREIGN KEY (Dostawca_ID) REFERENCES Dostawcy(Dostawca_ID)
+);
+
+CREATE TABLE Produkty (
+    Produkt_ID INT PRIMARY KEY,
+    Nazwa VARCHAR(100) NOT NULL,
+    Opis VARCHAR(200),
+    Cena DECIMAL(10, 2) CHECK (Cena > 0.0) NOT NULL,
+    Material_ID INT,
+    FOREIGN KEY (Material_ID) REFERENCES Materialy(Material_ID)
+   
+);
+
+CREATE TABLE Opis_Zamowienia (
+    Numer_Referencyjny INT PRIMARY KEY,
+    Zamowienie_ID INT,
+    Produkt_ID INT,
+    Ilosc INT CHECK (Ilosc > 0) NOT NULL,
+    Cena DECIMAL(10, 2) CHECK (Cena > 0.0) NOT NULL,
+    Planowana_Data_Dostawy DATE,
+    FOREIGN KEY (Zamowienie_ID) REFERENCES Zamowienia(Zamowienie_ID),
+    FOREIGN KEY (Produkt_ID) REFERENCES Produkty(Produkt_ID)
+);
+INSERT INTO Adres VALUES (1, 'ul. Wesoła', '1', '00-333', 'Warszawa', 'Polska');
+INSERT INTO Adres VALUES (2, 'ul. Pogodna', '11', '02-345', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES (3, 'ul. Łąkowa', '22', '15-003', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES (4, 'ul. Rzemieślnicza', '8', '01-001', 'Wrocław', 'Polska');
+INSERT INTO Adres VALUES (5, 'ul. Legionowa', '99', '30-400', 'Poznań', 'Polska');
+INSERT INTO Adres VALUES (6, 'ul. Waszyngtona', '23', '60-700', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES (7, 'ul. Pałacowa', '1', '06-456', 'Zakopane', 'Polska');
+INSERT INTO Adres VALUES(8, 'ul. Drewniana', '114', '05-005', 'Katowice', 'Polska');
+INSERT INTO Adres VALUES(9,  'ul. Towarowa', '15', '30-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES(10,  'ul. Wesoła', '14', '05-005', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES(11, 'ul. Tkacka', '5', '06-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES(12, 'ul. Drewniana', '114', '05-005', 'Katowice', 'Polska');
+INSERT INTO Adres VALUES(13,  'ul. Towarowa', '15', '30-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES(14,  'ul. Wesoła', '14', '05-005', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES(150, 'ul. Drewniana', '14', '05-005', 'Katowice', 'Polska');
+INSERT INTO Adres VALUES(160, 'ul. Tkacka', '5', '06-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES(170,  'ul. Drewniana', '14', '05-005', 'Katowice', 'Polska'); 
+INSERT INTO Adres VALUES(180, 'ul. Drewniana', '114', '05-005', 'Katowice', 'Polska');
+INSERT INTO Adres VALUES(190,  'ul. Towarowa', '15', '30-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES(200,  'ul. Wesoła', '14', '05-005', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES(201, 'ul. Tkacka', '5', '06-006', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES (301, 'ul. Markazytowa', '1', '00-333', 'Warszawa', 'Polska');
+INSERT INTO Adres VALUES (302, 'ul. Mickiewicza', '11', '02-345', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES (303, 'ul. Leśna', '22', '15-003', 'Białystok', 'Polska');
+INSERT INTO Adres VALUES (304, 'ul. Towarowa', '8', '01-001', 'Wrocław', 'Polska');
+INSERT INTO Adres VALUES (305, 'ul. Piękna', '99', '30-400', 'Poznań', 'Polska');
+INSERT INTO Adres VALUES (306, 'ul. Dębowa', '23', '60-700', 'Łódź', 'Polska');
+INSERT INTO Adres VALUES (307, 'ul. Pałacowa', '1', '06-456', 'Zakopane', 'Polska');
+
+INSERT INTO Klienci VALUES (1, NULL, 'Anna', 'Nowak', '600980768', 301);
+INSERT INTO Klienci VALUES (2, 'MeblePl', 'Jan', 'Nowak', '600879654', 302);
+INSERT INTO Klienci VALUES (3, 'Meblopol', 'Marta', 'Adamska', '506789432', 303);
+INSERT INTO Klienci VALUES (4, NULL, 'Adam', 'Stolarski', '444555666', 304);
+INSERT INTO Klienci VALUES (5, NULL, 'Alicja', 'Byk', '789000421', 305);
+INSERT INTO Klienci VALUES (6, NULL, 'Tomasz', 'Lis', '678900321', 306);
+INSERT INTO Klienci VALUES (7, NULL, 'Edyta', 'Skąpa', '567272744', 307);
+
+INSERT INTO Pracownicy VALUES(1, 'Adrian', 'Lis', 'Stolarz', '123456789', 'adrian.lis@gmail.com', 1,1, TO_DATE('1987-01-13', 'YYYY-MM-DD'), TO_DATE('2011-05-24', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(2, 'Edyta', 'Baran',  'Projektant', '987654321', 'edyta.baran@gmail.com', 2,2, TO_DATE('1999-03-29', 'YYYY-MM-DD'), TO_DATE('2019-11-10', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(3, 'Łukasz', 'Nowak', 'Stolarz', '555144333', 'lukasz.nowak@gmail.com', 1,3, TO_DATE('1985-11-30', 'YYYY-MM-DD'), TO_DATE('2014-03-15', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(4, 'Aleksandra', 'Kowalska',  'Projektant', '511222333', 'aleksandra.kowalska@gmail.com', 2,4, TO_DATE('1997-06-18', 'YYYY-MM-DD'), TO_DATE('2016-08-05', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(5, 'Tobiasz', 'Kułaj',  'Stolarz', '699888777', 'tobiasz.kulaj@gmail.com', 1,5, TO_DATE('1990-02-15', 'YYYY-MM-DD'), TO_DATE('2019-09-12', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(6, 'Eliza', 'Łęcka',  'Projektant', '744555666', 'eliza.lecka@gmail.com', 2,6, TO_DATE('1995-07-10', 'YYYY-MM-DD'), TO_DATE('2020-12-01', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(7, 'Robert', 'Małecki',  'Stolarz', '877818999', 'robert.malecki@gmail.com', 1,7, TO_DATE('1980-09-05', 'YYYY-MM-DD'), TO_DATE('2004-07-18', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(8, 'Adrian', 'Mierzwiński', 'Kadrowy', '332222111', 'adrian.mierzWinski@gmail.com', 5, 8, TO_DATE('1995-03-29', 'YYYY-MM-DD'), TO_DATE('2019-11-10', 'YYYY-MM-DD'));
+
+INSERT INTO Pracownicy VALUES(9, 'Maria', 'Nowak', 'Stolarz', '666555444', 'maria.nowak@gmail.com', 1,9, TO_DATE('1985-11-30', 'YYYY-MM-DD'), TO_DATE('2014-03-15', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(10, 'Adam', 'Koń',  'Marketing', '222333444', 'adam.kon@gmail.com', 6, 10, TO_DATE('1997-06-18', 'YYYY-MM-DD'), TO_DATE('2016-08-05', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(11, 'Tomasz', 'Kułaj',  'Marketing', '777888999', 'tomasz.kulaj@gmail.com', 6,11, TO_DATE('1990-02-15', 'YYYY-MM-DD'), TO_DATE('2019-09-12', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(12, 'Anna', 'Łęcka', 'Serwis posprzedażowy', '500600890', 'anna.lecka@gmail.com', 7, 12, TO_DATE('1995-07-10', 'YYYY-MM-DD'), TO_DATE('2020-12-01', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(13, 'Robert', 'Michalski', 'Handlowiec', '557444333', 'robert.michalski@gmail.com', 3,13,  TO_DATE('1988-09-05', 'YYYY-MM-DD'), TO_DATE('2004-07-18', 'YYYY-MM-DD'));
+INSERT INTO Pracownicy VALUES(14, 'Robert', 'Mors', 'Logistyk', '556444333', 'robert.mors@gmail.com', 4, 14, TO_DATE('1988-09-05', 'YYYY-MM-DD'), TO_DATE('2004-07-18', 'YYYY-MM-DD'));
+
+
+
+INSERT INTO Dzialy VALUES (1, 'Produkcja', TO_DATE('2000-01-01', 'YYYY-MM-DD'), 10, 1);
+INSERT INTO Dzialy VALUES (2, 'Projektowanie', TO_DATE('2005-02-15', 'YYYY-MM-DD'), 8, 2);
+INSERT INTO Dzialy VALUES  (3, 'Sprzedaż', TO_DATE('1998-12-10', 'YYYY-MM-DD'), 12, 13);
+INSERT INTO Dzialy VALUES (4, 'Logistyka', TO_DATE('2007-07-05', 'YYYY-MM-DD'), 6, 14);
+INSERT INTO Dzialy VALUES  (5, 'Kadry i płace', TO_DATE('1995-03-20', 'YYYY-MM-DD'), 5, 8);
+INSERT INTO Dzialy VALUES  (6, 'Marketing', TO_DATE('2009-11-28', 'YYYY-MM-DD'), 7, 11);
+INSERT INTO Dzialy VALUES  (7, 'Serwis posprzedażowy', TO_DATE('2003-09-08', 'YYYY-MM-DD'), 4, 12);
+
+INSERT INTO Zamowienia VALUES(1, TO_DATE('2023-05-10', 'YYYY-MM-DD'), 1500.00, 'Opłacone', 'W trakcie realizacji',1, 1);
+INSERT INTO Zamowienia VALUES(2,TO_DATE('2024-01-02', 'YYYY-MM-DD'), 5000.00, 'Opłacone', 'Wysłane', 2, 2);
+INSERT INTO Zamowienia VALUES(3, TO_DATE('2024-01-05', 'YYYY-MM-DD'), 18000.00, 'Opłacone', 'Zrealizowane',2, 3);
+INSERT INTO Zamowienia VALUES(4,TO_DATE('2024-01-06', 'YYYY-MM-DD'), 1200.00, 'Opłacone', 'Zrealizowane',4, 4);
+INSERT INTO Zamowienia VALUES(5,TO_DATE('2024-01-06', 'YYYY-MM-DD'), 20000.00, 'Opłacone', 'W trakcie realizacji',4, 5);
+INSERT INTO Zamowienia VALUES(6,TO_DATE('2024-01-12', 'YYYY-MM-DD'), 2200.00, 'Opłacone', 'Wysłane',2, 6);
+INSERT INTO Zamowienia VALUES(7,TO_DATE('2024-01-13', 'YYYY-MM-DD'), 1700.00, 'Opłacone', 'Zrealizowane',1, 7);
+
+INSERT INTO Dostawcy VALUES(1, 'Tartak Nowak', '777000999', NULL, 'info@tartak.com', 150);
+INSERT INTO Dostawcy VALUES(2, 'Drewnex', '446789777', NULL, 'biuro@drewnex.com', 160);
+INSERT INTO Dostawcy VALUES(3, 'Marexpol', '789000789', NULL, 'info@marekxpol.com', 170);
+INSERT INTO Dostawcy VALUES(4, 'Tartak BOB', '674000001', NULL, 'biuro@tartakbob.com', 180);
+INSERT INTO Dostawcy VALUES(5, 'DMH', '789000340', NULL, 'info@dmh.com', 190);
+INSERT INTO Dostawcy VALUES(6, 'TPLL', '506655666', NULL, 'biuro@tpll.com', 200);
+INSERT INTO Dostawcy VALUES(7, 'TK Tkaniny', '1236678000', NULL, 'info@tktkaniny.com', 201);
+
+
+
+INSERT INTO Materialy VALUES(1, 'Olcha deska', 'm2', 150.00, 3);
+INSERT INTO Materialy VALUES(2, 'Sosna deska', 'm2', 130.00, 4);
+INSERT INTO Materialy VALUES(3, 'Dąb deska', 'm2', 50.00, 3);
+INSERT INTO Materialy VALUES(4, 'Sklejka brzozowa', 'm2', 130.00, 4);
+INSERT INTO Materialy VALUES(5, 'Sklejka brzozowa deska', 'm2', 150.00, 3);
+INSERT INTO Materialy VALUES(6, 'Jesion deska', 'm2', 30.00, 4);
+INSERT INTO Materialy VALUES(7, 'Tkanina tapicerska', 'm2', 130.00, 4);
+
+INSERT INTO Produkty VALUES(1, 'Stół drewniany', 'Meble kuchenne',  1500.00, 1);
+INSERT INTO Produkty VALUES(2, 'Krzesło dębowe', 'Meble kuchenne', 200.00, 2);
+INSERT INTO Produkty VALUES(3, 'Biurko ', 'Meble biurowe', 800.00, 2);
+INSERT INTO Produkty VALUES(4, 'Łóżko sosnowe', 'Meble sypialniane', 2000.00, 1);
+INSERT INTO Produkty VALUES(5, 'Regał olcha', 'Meble do salonu', 1700.00, 3);
+INSERT INTO Produkty VALUES(6, 'Szafka zamykana', 'Meble do salonu', 300.00, 4);
+INSERT INTO Produkty VALUES(7, 'Krzesło biurowe', 'Meble biurowe', 150.00, 2);
+
+
+
+INSERT INTO Opis_Zamowienia VALUES(1, 2, 1, 3, 200.00, TO_DATE('2023-05-10', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(2,2, 3, 5, 100.00, TO_DATE('2023-06-20', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(3,3, 2, 7, 600.00, TO_DATE('2023-07-05', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(4,1, 4, 8, 500.00, TO_DATE('2023-08-15', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(5,4, 5, 5, 400.00, TO_DATE('2023-09-01', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(6,4,1, 4, 300.00, TO_DATE('2023-10-12', 'YYYY-MM-DD'));
+INSERT INTO Opis_Zamowienia VALUES(7,2, 3, 2, 200.00, TO_DATE('2023-11-25', 'YYYY-MM-DD'));
